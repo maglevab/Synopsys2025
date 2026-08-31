@@ -1,0 +1,40 @@
+import requests
+
+classPrompt = "Remember examples of Academic Text such as essays or school assignments and examples of scientific texts such as research papers and abstracts as “category 0 text”. Here is an example of academic-scientific text: “We hypothesized that impairment of peripheral perfusion index (PPI) during spontaneous breathing trial (SBT) might be predictive of weaning failure. We included 44 consecutive, adult, patients, who were scheduled for weaning after at least 48 h of invasive mechanical ventilation in this prospective observational study. Weaning failure was defined as failed SBT or reintubation within 48 h of extubation. PPI readings were obtained before initiation of the SBT, and every 5 min till the end of the SBT. PPI ratio was calculated at every time point as: PPI value/ baseline PPI. The primary outcome was the accuracy of PPI ratio at the end of the SBT in detecting failed weaning. Forty-three patients were available for the final analysis. Eighteen patients (42%) were considered failed weaning. PPI ratio was higher in patients with successful weaning compared to patients with failed weaning during the last 15 min of the SBT. “ Remember examples of News-Related Texts such as news articles, reddit threads, reviews, and wikipedia entries as “Category 1 text”. Here is an example: “Daniel Greenfield, a Shillman Journalism Fellow at the Freedom Center, is a New York writer focusing on radical Islam. In the final stretch of the election, Hillary Rodham Clinton has gone to war with the FBI. The word “unprecedented” has been thrown around so often this election that it ought to be retired. But it’s still unprecedented for the nominee of a major political party to go war with the FBI. But that’s exactly what Hillary and her people have done. Coma patients just waking up now and watching an hour of CNN from their hospital beds would assume that FBI Director James Comey is Hillary’s opponent in this election. The FBI is under attack by everyone from Obama to CNN. Hillary’s people have circulated a letter attacking Comey. There are currently more media hit pieces lambasting him than targeting Trump. It wouldn’t be too surprising if the Clintons or their allies were to start running attack ads against the FBI.”  Here is another example: WHITE PLAINS, N.Y. — Not to be outdone by her Republican rival, Hillary Clinton fired off a series of early-morning messages Saturday  on Twitter. Only the tweets sent over the Democratic presidential nominee’s account dealt with a very different subject matter than those blasted about a former beauty-pageant winner by Donald Trump 24 hours before. [Trump under fire after sending nasty tweets about ‘disgusting’ ex-Miss Universe] Clinton instead focused on national service, a subject to which she had devoted a speech in Florida on Friday. “It's 3:20am. As good a time as any to tweet about national service,” said the first one, coming at the same time that Trump started his storm of disparaging tweets about former Miss Universe Alicia Machado.The next Clinton tweet borrowed a favorite word of Trump.“There are hundreds of thousands more @AmeriCorps applications than spots. Horrible!” it read. “Let's expand it from 75,000 annual members to 250,000.”. Here is another example of News-Related Text: asts and big cities, fusing social and economic liberalism. As the parties became less internally diverse, individual members of Congress delegated more power to their party leaders. After all, they all now basically agreed on the issues. And they wanted leaders who could punish disloyal dissenters and control the agenda. So when Newt Gingrich took over the speakership in 1995, he centralized power in the position in a way it had not been centralized since 1910. In the 1990s, American politics entered a somewhat unusual period of remarkably close two-party competition for control of the House and the Senate. This, as political scientist Frances Lee explains, has been the catalyst for a very nasty brand of partisan fighting. This seems exactly right to me, and there's lots of evidence to prove it.” Remember examples of Fiction such as novels or stories as “Category 2 text”. Here is an example of Fiction Text: “Umbridge had called them all to order and silence fell. 'Wands away,' she instructed them all with a smile, and those people who had been hopeful enough to take them out, sadly returned them to their bags. 'As we finished Chapter One last lesson, I would like you all to turn to page nineteen today and commence ‘Chapter Two, Common Defensive Theories and their Derivation’. There will be no need to talk.' Still smiling her wide, self-satisfied smile, she sat down at her desk. The class gave an audible sigh as it turned, as one, to page nineteen. Harry wondered dully whether there were enough chapters in the book to keep them reading through all this years lessons and was on the point of checking the contents page when he noticed that Hermione had her hand in the air again.” Here is another example of Fiction Text: “ In Brandy Hall there were many works dealing with Eriador and the history of Rohan. Some of these were composed or begun by Meriadoc himself, though in the Shire he was chiefly remembered for his _Herblore of the Shire,_ and for his _Reckoning of Years_ m which he discussed the relation of the calendars of the Shire and Bree to those of Rivendell, Gondor, and Rohan. He also wrote a short treatise on _Old Words and Names in the Shire,_ having special interest in discovering the kinship with the language of the Rohirrim of such 'shire-words' as _mathom_ and old elements in place names.      At Great Smials the books were of less interest to Shire-folk, though more important for larger history. None of them was written by Peregrin, but he and his successors collected many manuscripts written by scribes of Gondor: mainly copies or summaries of histories or legends relating to Elendil and his heirs.” Here is another example of Literary Text: “ Hardly anyone he knew was left in town. Julie had gone, and so had Princess Mary. Of his intimate friends only the Rostovs remained, but he did not go to see them.  To distract his thoughts he drove that day to the village of Vorontsovo to see the great balloon Leppich was constructing to destroy the foe, and a trial balloon that was to go up next day. The balloon was not yet ready, but Pierre learned that it was being constructed by the Emperor's desire. The Emperor had written to Count Rostopchin as follows:  As soon as Leppich is ready, get together a crew of reliable and intelligent men for his car and send a courier to General Kutuzov to let him know. I have informed him of the matter.  Please impress upon Leppich to be very careful where he descends for the first time, that he may not make a mistake and fall into the enemy's hands.” Using these categories, analyze the given text and output the best fit category, do not add reasoning, but only the string containing the word category and the number. Here is the text you need to classify: "
+url = "http://localhost:11434/api/chat"
+
+def llamaModel(prompt):
+    data = {
+        "model": "llama3",
+        "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        "stream": False
+    }
+
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()['message']['content']
+
+def classify_data(generation):
+    """Classify the data using the model and handle retries."""
+    while_count = 0
+    while True:
+        class_num = llamaModel(classPrompt + generation)
+        print(class_num)
+        class_num = class_num[9]
+        if class_num in {"0", "1", "2"}:
+            return int(class_num)
+        print("Redoing classification...")
+        while_count += 1
+        if while_count == 10:
+            print("Max retries reached.")
+            return -1  # Default class
+
+print(llamaModel("This is a prompt"))
